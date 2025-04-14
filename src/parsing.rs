@@ -10,10 +10,14 @@ use pamm::accounts::Pool;
 declare_program!(raydium_amm_cpmm_new);
 use raydium_amm_cpmm_new::accounts::PoolState;
 
+declare_program!(raydium_camm);
+use raydium_camm::accounts::PoolState as RaydiumCammPoolState;
+
 #[derive(Debug, Clone)]
 pub enum PoolType {
     PumpFun { program_id: Pubkey },
     RaydiumCpmmAmm { program_id: Pubkey },
+    RaydiumCamm { program_id: Pubkey },
 }
 
 impl PoolType {
@@ -21,6 +25,7 @@ impl PoolType {
         match self {
             PoolType::PumpFun { program_id } => *program_id,
             PoolType::RaydiumCpmmAmm { program_id } => *program_id,
+            PoolType::RaydiumCamm { program_id } => *program_id,
         }
     }
 
@@ -28,6 +33,7 @@ impl PoolType {
         match self {
             PoolType::PumpFun { .. } => "PumpFun AMM",
             PoolType::RaydiumCpmmAmm { .. } => "Raydium AMM",
+            PoolType::RaydiumCamm { .. } => "Raydium AMM",
         }
     }
 }
@@ -73,9 +79,25 @@ fn handle_raydium_cpmm_amm_deserialize(
     Ok(pool)
 }
 
+fn handle_raydium_camm_deserialize(
+    program_id: Pubkey,
+    con: RpcClient,
+) -> std::result::Result<RaydiumCammPoolState, PoolError> {
+    let data = match con.get_account_data(&program_id) {
+        Ok(data) => data,
+        Err(e) => return Err(PoolError::RpcError(e)),
+    };
+    let pool = match RaydiumCammPoolState::try_deserialize(&mut &data[..]) {
+        Ok(pool_state) => pool_state,
+        Err(e) => return Err(PoolError::DeserializeError(e)),
+    };
+    Ok(pool)
+}
+
 pub enum AmmPool {
     PumpFun(Pool),
     RaydiumCpmmAmm(PoolState),
+    RaydiumCamm(RaydiumCammPoolState),
 }
 
 impl Debug for AmmPool {
@@ -85,6 +107,7 @@ impl Debug for AmmPool {
             AmmPool::RaydiumCpmmAmm(pool_state) => {
                 f.debug_tuple("Raydium").field(pool_state).finish()
             }
+            AmmPool::RaydiumCamm(pool_state) => f.debug_tuple("Raydium").field(pool_state).finish(),
         }
     }
 }
@@ -126,6 +149,9 @@ pub async fn get_info_struct(
         }
         PoolType::RaydiumCpmmAmm { program_id } => {
             AmmPool::RaydiumCpmmAmm(handle_raydium_cpmm_amm_deserialize(program_id, connection)?)
+        }
+        PoolType::RaydiumCamm { program_id } => {
+            AmmPool::RaydiumCamm(handle_raydium_camm_deserialize(program_id, connection)?)
         }
     };
 
