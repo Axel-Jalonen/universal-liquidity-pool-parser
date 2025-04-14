@@ -1,5 +1,5 @@
 [package]
-name = "universal-liquidity-pool-parser"
+name = "universal_liquidity_pool_parser"
 version = "0.1.0"
 edition = "2024"
 
