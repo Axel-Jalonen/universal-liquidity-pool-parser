@@ -2,7 +2,7 @@ use anchor_client::{
     solana_client::rpc_client::RpcClient, solana_sdk::commitment_config::CommitmentConfig,
 };
 use anchor_lang::prelude::*;
-use std::{fmt::Debug, str::FromStr};
+use std::fmt::Debug;
 
 declare_program!(pamm);
 use pamm::accounts::Pool;
@@ -129,18 +129,8 @@ pub async fn get_info_struct(
         }
     };
 
-    // println!("Deserialized pool: {:?}", pool);
-
     Ok(pool)
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    let rpc_url = "https://mainnet.helius-rpc.com/?api-key=...".to_string();
-    let program_id = Pubkey::from_str("PROGRAM_ID_HERE")?;
-
-    let pool_type = PoolType::RaydiumCpmmAmm { program_id };
-    get_info_struct(pool_type, rpc_url).await?;
-
-    Ok(())
-}
+async fn main() {}
