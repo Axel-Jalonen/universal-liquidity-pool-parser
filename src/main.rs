@@ -13,21 +13,21 @@ use raydium_amm_cpmm_new::accounts::PoolState;
 #[derive(Debug, Clone)]
 pub enum PoolType {
     PumpFun { program_id: Pubkey },
-    Raydium { program_id: Pubkey },
+    RaydiumCpmmAmm { program_id: Pubkey },
 }
 
 impl PoolType {
     pub fn program_id(&self) -> Pubkey {
         match self {
             PoolType::PumpFun { program_id } => *program_id,
-            PoolType::Raydium { program_id } => *program_id,
+            PoolType::RaydiumCpmmAmm { program_id } => *program_id,
         }
     }
 
     pub fn pool_name(&self) -> &'static str {
         match self {
             PoolType::PumpFun { .. } => "PumpFun AMM",
-            PoolType::Raydium { .. } => "Raydium AMM",
+            PoolType::RaydiumCpmmAmm { .. } => "Raydium AMM",
         }
     }
 }
@@ -58,7 +58,7 @@ fn handle_pump_amm_deserialize(
     Ok(pool)
 }
 
-fn handle_raydium_amm_deserialize(
+fn handle_raydium_cpmm_amm_deserialize(
     program_id: Pubkey,
     con: RpcClient,
 ) -> std::result::Result<raydium_amm_cpmm_new::accounts::PoolState, PoolError> {
@@ -75,14 +75,16 @@ fn handle_raydium_amm_deserialize(
 
 pub enum AmmPool {
     PumpFun(Pool),
-    Raydium(PoolState),
+    RaydiumCpmmAmm(PoolState),
 }
 
 impl Debug for AmmPool {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AmmPool::PumpFun(pool) => f.debug_tuple("PumpFun").field(pool).finish(),
-            AmmPool::Raydium(pool_state) => f.debug_tuple("Raydium").field(pool_state).finish(),
+            AmmPool::RaydiumCpmmAmm(pool_state) => {
+                f.debug_tuple("Raydium").field(pool_state).finish()
+            }
         }
     }
 }
@@ -122,8 +124,8 @@ pub async fn get_info_struct(
             let p = handle_pump_amm_deserialize(program_id, &connection)?;
             AmmPool::PumpFun(p)
         }
-        PoolType::Raydium { program_id } => {
-            AmmPool::Raydium(handle_raydium_amm_deserialize(program_id, connection)?)
+        PoolType::RaydiumCpmmAmm { program_id } => {
+            AmmPool::RaydiumCpmmAmm(handle_raydium_cpmm_amm_deserialize(program_id, connection)?)
         }
     };
 
@@ -137,7 +139,7 @@ async fn main() -> anyhow::Result<()> {
     let rpc_url = "https://mainnet.helius-rpc.com/?api-key=...".to_string();
     let program_id = Pubkey::from_str("PROGRAM_ID_HERE")?;
 
-    let pool_type = PoolType::Raydium { program_id };
+    let pool_type = PoolType::RaydiumCpmmAmm { program_id };
     get_info_struct(pool_type, rpc_url).await?;
 
     Ok(())
