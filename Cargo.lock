@@ -2563,20 +2563,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pamm-parsing"
-version = "0.1.0"
-dependencies = [
- "anchor-client",
- "anchor-lang",
- "anchor-lang-idl",
- "anyhow",
- "serde_json",
- "solana-program",
- "spl-token 8.0.0",
- "tokio",
-]
-
-[[package]]
 name = "parking"
 version = "2.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6357,6 +6343,20 @@ checksum = "fc1de2c688dc15305988b563c3854064043356019f97a4b46276fe734c4f07ea"
 dependencies = [
  "crypto-common",
  "subtle",
+]
+
+[[package]]
+name = "universal-liquidity-pool-parser"
+version = "0.1.0"
+dependencies = [
+ "anchor-client",
+ "anchor-lang",
+ "anchor-lang-idl",
+ "anyhow",
+ "serde_json",
+ "solana-program",
+ "spl-token 8.0.0",
+ "tokio",
 ]
 
 [[package]]
