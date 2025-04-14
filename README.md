@@ -11,3 +11,10 @@ Provides a universal interface for parsing liquidity pools on Solana. It offers 
 
 ### (New) Pump.fun Liquidity Pools
 - Pump Swap AMM: `pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA`
+
+## Features to Add
+- Support for additional protocols
+- Improved error handling and logging
+- Enhanced documentation and examples
+- Parsing from JSON
+- Parsing from Bytes
