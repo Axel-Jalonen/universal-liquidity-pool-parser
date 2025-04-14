@@ -47,7 +47,7 @@ fn handle_raydium_amm_deserialize(
     Ok(pool)
 }
 
-enum AmmPool {
+pub enum AmmPool {
     PumpFun(Pool),
     Raydium(PoolState),
 }
@@ -61,7 +61,7 @@ impl Debug for AmmPool {
     }
 }
 
-pub async fn get_info_struct(pool_type: PoolType, rpc_url: String) -> anyhow::Result<()> {
+pub async fn get_info_struct(pool_type: PoolType, rpc_url: String) -> anyhow::Result<AmmPool> {
     let connection = RpcClient::new_with_commitment(rpc_url, CommitmentConfig::confirmed());
 
     let pool = match pool_type {
@@ -73,9 +73,9 @@ pub async fn get_info_struct(pool_type: PoolType, rpc_url: String) -> anyhow::Re
         }
     };
 
-    println!("Deserialized pool: {:?}", pool);
+    // println!("Deserialized pool: {:?}", pool);
 
-    Ok(())
+    Ok(pool)
 }
 
 #[tokio::main]
