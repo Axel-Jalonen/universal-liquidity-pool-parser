@@ -1,8 +1,7 @@
-use anchor_client::{
-    solana_client::rpc_client::RpcClient, solana_sdk::commitment_config::CommitmentConfig,
-};
-use anchor_lang::prelude::*;
+use anchor_client::{self, solana_client::rpc_client::RpcClient};
+use anchor_lang::prelude::{AccountDeserialize, Pubkey, declare_program, error};
 use std::fmt::Debug;
+use thiserror::Error;
 
 declare_program!(pamm);
 use pamm::accounts::Pool;
@@ -37,8 +36,6 @@ impl PoolType {
         }
     }
 }
-
-use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum PoolError {
@@ -117,7 +114,7 @@ impl Debug for AmmPool {
 /// # Arguments
 ///
 /// * `pool_type` - An enum representing the type of pool (PumpFun or Raydium) and its associated program ID.
-/// * `rpc_url` - A string containing the URL of the RPC endpoint.
+/// * `rpc_client` - An instance of the `RpcClient`.
 ///
 /// # Returns
 ///
@@ -130,28 +127,25 @@ impl Debug for AmmPool {
 /// # Examples
 ///
 /// ```
-/// let rpc_url = "https://mainnet.helius-rpc.com/?api-key=...".to_string();
+/// let rpc_client = RpcClient::new("https://mainnet.helius-rpc.com/?api-key=...");
 /// let program_id = Pubkey::from_str("PROGRAM_ID_HERE")?;
 /// let pool_type = PoolType::Raydium { program_id };
-/// let pool_info = get_info_struct(pool_type, rpc_url).await?;
+/// let pool_info = get_info_struct(pool_type, rpc_client).await?;
 /// println!("{:?}", pool_info);
 /// ```
 pub async fn get_info_struct(
     pool_type: PoolType,
-    rpc_url: String,
+    rpc_client: RpcClient,
 ) -> std::result::Result<AmmPool, PoolError> {
-    let connection = RpcClient::new_with_commitment(rpc_url, CommitmentConfig::confirmed());
-
     let pool = match pool_type {
         PoolType::PumpFun { program_id } => {
-            let p = handle_pump_amm_deserialize(program_id, &connection)?;
-            AmmPool::PumpFun(p)
+            AmmPool::PumpFun(handle_pump_amm_deserialize(program_id, &rpc_client)?)
         }
         PoolType::RaydiumCpmmAmm { program_id } => {
-            AmmPool::RaydiumCpmmAmm(handle_raydium_cpmm_amm_deserialize(program_id, connection)?)
+            AmmPool::RaydiumCpmmAmm(handle_raydium_cpmm_amm_deserialize(program_id, rpc_client)?)
         }
         PoolType::RaydiumCamm { program_id } => {
-            AmmPool::RaydiumCamm(handle_raydium_camm_deserialize(program_id, connection)?)
+            AmmPool::RaydiumCamm(handle_raydium_camm_deserialize(program_id, rpc_client)?)
         }
     };
 
