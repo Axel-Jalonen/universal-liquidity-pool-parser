@@ -13,9 +13,15 @@ declare_program!(raydium_camm);
 use raydium_camm::accounts::PoolState as RaydiumCammPoolState;
 
 #[derive(Debug, Clone)]
+/// Enum representing different types of pools that can be passed to functions.
+///
+/// Each variant contains a `program_id` which is a `Pubkey` identifying the program associated with the pool.
 pub enum PoolType {
+    /// Represents a PumpFun AMM pool.
     PumpFun { program_id: Pubkey },
+    /// Represents a Raydium CPMM AMM pool.
     RaydiumCpmmAmm { program_id: Pubkey },
+    /// Represents a Raydium CAMM pool.
     RaydiumCamm { program_id: Pubkey },
 }
 
@@ -38,10 +44,17 @@ impl PoolType {
 }
 
 #[derive(Error, Debug)]
+/// Enum representing possible errors that can occur when handling pool operations.
 pub enum PoolError {
+    /// Error that occurs when there is an issue with the RPC client.
+    ///
+    /// This error wraps the underlying `ClientError` from the `anchor_client` crate.
     #[error("RPC client error: {0}")]
     RpcError(#[from] anchor_client::solana_client::client_error::ClientError),
 
+    /// Error that occurs when deserialization of pool data fails.
+    ///
+    /// This error wraps the underlying `Error` from the `anchor_lang` crate.
     #[error("Deserialization error: {0}")]
     DeserializeError(#[from] anchor_lang::error::Error),
 }
@@ -92,8 +105,11 @@ fn handle_raydium_camm_deserialize(
 }
 
 pub enum AmmPool {
+    /// Represents a PumpFun AMM pool.
     PumpFun(Pool),
+    /// Represents a Raydium CPMM AMM pool.
     RaydiumCpmmAmm(PoolState),
+    /// Represents a Raydium CAMM pool.
     RaydiumCamm(RaydiumCammPoolState),
 }
 
